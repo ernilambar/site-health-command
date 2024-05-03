@@ -21,7 +21,8 @@
     "extra": {
         "bundled": false,
         "commands": [
-            "site-health check"
+            "site-health check",
+            "site-health status"
         ]
     },
     "autoload": {
