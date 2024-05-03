@@ -63,13 +63,55 @@ class SiteHealthCommand extends WP_CLI_Command {
 	 *     | Plugin Versions   | Security    | recommended | You should remove inactive plugins                       |
 	 *     | Theme Versions    | Security    | recommended | You should remove inactive themes                        |
 	 *     | PHP Version       | Performance | good        | Your site is running the current version of PHP (8.2.18) |
-	 *
-	 * @param array $args       Indexed array of positional arguments.
-	 * @param array $assoc_args Associative array of associative arguments.
 	 */
 	public function check( $args, $assoc_args ) {
 		$checks = $this->get_checks();
 
+		$results = $this->run_checks( $checks );
+
+		$format = Utils\get_flag_value( $assoc_args, 'format', 'table' );
+
+		$formatter = $this->get_formatter( $assoc_args );
+
+		$formatter->display_items( $results );
+	}
+
+	/**
+	 * Check site health status.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Check site health status.
+	 *     $ wp site-health status
+	 *     good
+	 */
+	public function status() {
+		$site_status = '';
+
+		$checks = $this->get_checks();
+
+		$results = $this->run_checks( $checks );
+
+		$count_details = $this->get_status_count_details( $results );
+
+		if ( $count_details['total'] > 0 ) {
+			if ( $count_details['critical'] > 1 ) {
+				$site_status = 'critical';
+			} else {
+				$good_percent = ( $count_details['good'] * 100 ) / $count_details['total'];
+
+				if ( $good_percent < 80 ) {
+					$site_status = 'recommended';
+				} else {
+					$site_status = 'good';
+				}
+			}
+		}
+
+		WP_CLI::line( $site_status );
+	}
+
+	protected function run_checks( $checks ) {
 		$results = [];
 
 		if ( ! empty( $checks ) ) {
@@ -109,11 +151,7 @@ class SiteHealthCommand extends WP_CLI_Command {
 			}
 		}
 
-		$format = Utils\get_flag_value( $assoc_args, 'format', 'table' );
-
-		$formatter = $this->get_formatter( $assoc_args );
-
-		$formatter->display_items( $results );
+		return $results;
 	}
 
 	protected function get_checks() {
@@ -132,6 +170,18 @@ class SiteHealthCommand extends WP_CLI_Command {
 		}
 
 		return $checks;
+	}
+
+	private function get_status_count_details( $results ) {
+		$output = [
+			'critical'    => count( wp_list_filter( $results, [ 'status' => 'critical' ] ) ),
+			'recommended' => count( wp_list_filter( $results, [ 'status' => 'recommended' ] ) ),
+			'good'        => count( wp_list_filter( $results, [ 'status' => 'good' ] ) ),
+		];
+
+		$output['total'] = array_sum( $output );
+
+		return $output;
 	}
 
 	/**

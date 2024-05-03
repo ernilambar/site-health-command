@@ -9,6 +9,12 @@ Quick links: [Using](#using) | [Installing](#installing) | [Contributing](#contr
 
 ## Using
 
+This package implements the following commands:
+
+### wp site-health check
+
+Run site health checks.
+
 ~~~
 wp site-health check [--format=<format>]
 ~~~
@@ -37,6 +43,22 @@ wp site-health check [--format=<format>]
     | Plugin Versions   | Security    | recommended | You should remove inactive plugins                       |
     | Theme Versions    | Security    | recommended | You should remove inactive themes                        |
     | PHP Version       | Performance | good        | Your site is running the current version of PHP (8.2.18) |
+
+
+
+### wp site-health status
+
+Check site health status.
+
+~~~
+wp site-health status 
+~~~
+
+**EXAMPLES**
+
+    # Check site health status.
+    $ wp site-health status
+    good
 
 ## Installing
 
