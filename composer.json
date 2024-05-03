@@ -1,0 +1,55 @@
+{
+    "name": "ernilambar/site-health-command",
+    "type": "wp-cli-package",
+    "description": "",
+    "homepage": "https://github.com/ernilambar/site-health-command",
+    "license": "MIT",
+    "authors": [],
+    "require": {
+        "wp-cli/wp-cli": "^2.11"
+    },
+    "require-dev": {
+        "wp-cli/wp-cli-tests": "^4"
+    },
+    "config": {
+        "process-timeout": 7200,
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "extra": {
+        "bundled": false,
+        "commands": [
+            "site-health check"
+        ]
+    },
+    "autoload": {
+        "psr-4": {
+            "WP_CLI\\SiteHealth\\": "src/"
+        },
+        "files": [
+            "site-health-command.php"
+        ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "behat": "run-behat-tests",
+        "behat-rerun": "rerun-behat-tests",
+        "lint": "run-linter-tests",
+        "phpcs": "run-phpcs-tests",
+        "phpcbf": "run-phpcbf-cleanup",
+        "phpunit": "run-php-unit-tests",
+        "prepare-tests": "install-package-tests",
+        "test": [
+            "@lint",
+            "@phpcs",
+            "@phpunit",
+            "@behat"
+        ]
+    },
+    "support": {
+        "issues": "https://github.com/ernilambar/site-health-command/issues"
+    }
+}
