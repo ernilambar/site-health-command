@@ -40,20 +40,26 @@ Feature: Site Health tests
   Scenario: Site Health Info by section
     Given a WP install
 
+    When I try `wp site-health info`
+    Then STDERR should be:
+      """
+      Error: Please specify a section, or use the --all flag.
+      """
+
+    When I run `wp site-health info wp-constants`
+    Then STDOUT should not contain:
+      """
+      ABSPATH
+      """
+
+    When I run `wp site-health info wp-constants --private`
+    Then STDOUT should contain:
+      """
+      ABSPATH
+      """
+
     When I run `wp site-health info wp-constants`
     Then STDOUT should be a table containing rows:
-      | label                  | section             |
-      | WordPress              | wp-core             |
-      | Directories and Sizes  | wp-paths-sizes      |
-      | Drop-ins               | wp-dropins          |
-      | Active Theme           | wp-active-theme     |
-      | Parent Theme           | wp-parent-theme     |
-      | Inactive Themes        | wp-themes-inactive  |
-      | Must Use Plugins       | wp-mu-plugins       |
-      | Active Plugins         | wp-plugins-active   |
-      | Inactive Plugins       | wp-plugins-inactive |
-      | Media Handling         | wp-media            |
-      | Server                 | wp-server           |
-      | Database               | wp-database         |
-      | WordPress Constants    | wp-constants        |
-      | Filesystem Permissions | wp-filesystem       |
+      | field      | label      | value     | debug     |
+      | WP_HOME    | WP_HOME    | Undefined | undefined |
+      | WP_SITEURL | WP_SITEURL | Undefined | undefined |

@@ -180,12 +180,18 @@ class SiteHealthCommand extends WP_CLI_Command {
 	}
 
 	/**
-	 * List site health info.
+	 * Displays site health info.
 	 *
 	 * ## OPTIONS
 	 *
 	 * [<section>]
 	 * : Section slug.
+	 *
+	 * [--all]
+	 * : Displays info for all sections.
+	 *
+	 * [--fields=<fields>]
+	 * : Limit the output to specific fields.
 	 *
 	 * [--format=<format>]
 	 * : Render output in a particular format.
@@ -197,6 +203,9 @@ class SiteHealthCommand extends WP_CLI_Command {
 	 *   - json
 	 *   - yaml
 	 * ---
+	 *
+	 * [--private]
+	 * : Display private fields. Disabled by default.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -224,15 +233,41 @@ class SiteHealthCommand extends WP_CLI_Command {
 	public function info( $args, $assoc_args ) {
 		$section = reset( $args );
 
-		$details = $this->get_section_info( $section, $assoc_args );
+		$all = Utils\get_flag_value( $assoc_args, 'all', false );
 
-		// print_r( $details );
+		if ( empty( $section ) && ! $all ) {
+			WP_CLI::error( 'Please specify a section, or use the --all flag.' );
+		}
 
-		// $sections = $this->get_sections();
+		$private = Utils\get_flag_value( $assoc_args, 'private', false );
 
-		$format = Utils\get_flag_value( $assoc_args, 'format', 'table' );
+		$default_fields = [ 'field', 'label', 'value', 'debug' ];
 
-		$assoc_args['fields'] = [ 'field', 'private', 'label', 'value', 'debug' ];
+		if ( $private ) {
+			$default_fields = [ 'field', 'private', 'label', 'value', 'debug' ];
+		}
+
+		if ( $all ) {
+			$all_sections = $this->get_sections();
+
+			$sections = wp_list_pluck( $all_sections, 'section' );
+
+			$details = [];
+
+			foreach ( $sections as $section ) {
+				$details = array_merge( $details, $this->get_section_info( $section, $assoc_args ) );
+			}
+		} else {
+			$details = $this->get_section_info( $section, $assoc_args );
+		}
+
+		if ( ! $private ) {
+			$details = wp_list_filter( $details, [ 'private' => false ] );
+		}
+
+		if ( empty( $assoc_args['fields'] ) ) {
+			$assoc_args['fields'] = $default_fields;
+		}
 
 		$formatter = $this->get_formatter( $assoc_args );
 
@@ -252,7 +287,7 @@ class SiteHealthCommand extends WP_CLI_Command {
 		return $sections;
 	}
 
-	protected function get_section_info( $section, $assoc_args ) {
+	protected function get_section_info( $section ) {
 		$details = [];
 
 		if ( ! isset( $this->info[ $section ] ) ) {
@@ -265,7 +300,7 @@ class SiteHealthCommand extends WP_CLI_Command {
 				'section' => $section,
 				'label'   => $field['label'],
 				'value'   => $field['value'],
-				'debug'   => isset( $field['value'] ) ? $field['value'] : null,
+				'debug'   => isset( $field['debug'] ) ? $field['debug'] : null,
 				'private' => isset( $field['private'] ) ? (bool) $field['private'] : false,
 			);
 		}
