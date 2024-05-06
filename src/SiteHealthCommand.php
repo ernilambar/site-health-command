@@ -179,6 +179,66 @@ class SiteHealthCommand extends WP_CLI_Command {
 		$formatter->display_items( $sections );
 	}
 
+	/**
+	 * List site health info.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [<section>]
+	 * : Section slug.
+	 *
+	 * [--format=<format>]
+	 * : Render output in a particular format.
+	 * ---
+	 * default: table
+	 * options:
+	 *   - table
+	 *   - csv
+	 *   - json
+	 *   - yaml
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # List site health info.
+	 *     $ wp site-health list-info-sections
+	 *     +------------------------+---------------------+
+	 *     | label                  | section             |
+	 *     +------------------------+---------------------+
+	 *     | WordPress              | wp-core             |
+	 *     | Directories and Sizes  | wp-paths-sizes      |
+	 *     | Drop-ins               | wp-dropins          |
+	 *     | Active Theme           | wp-active-theme     |
+	 *     | Parent Theme           | wp-parent-theme     |
+	 *     | Inactive Themes        | wp-themes-inactive  |
+	 *     | Must Use Plugins       | wp-mu-plugins       |
+	 *     | Active Plugins         | wp-plugins-active   |
+	 *     | Inactive Plugins       | wp-plugins-inactive |
+	 *     | Media Handling         | wp-media            |
+	 *     | Server                 | wp-server           |
+	 *     | Database               | wp-database         |
+	 *     | WordPress Constants    | wp-constants        |
+	 *     | Filesystem Permissions | wp-filesystem       |
+	 *     +------------------------+---------------------+
+	 */
+	public function info( $args, $assoc_args ) {
+		$section = reset( $args );
+
+		$details = $this->get_section_info( $section, $assoc_args );
+
+		// print_r( $details );
+
+		// $sections = $this->get_sections();
+
+		$format = Utils\get_flag_value( $assoc_args, 'format', 'table' );
+
+		$assoc_args['fields'] = [ 'field', 'private', 'label', 'value', 'debug' ];
+
+		$formatter = $this->get_formatter( $assoc_args );
+
+		$formatter->display_items( $details );
+	}
+
 	protected function get_sections() {
 		$sections = [];
 
@@ -190,6 +250,27 @@ class SiteHealthCommand extends WP_CLI_Command {
 		}
 
 		return $sections;
+	}
+
+	protected function get_section_info( $section, $assoc_args ) {
+		$details = [];
+
+		if ( ! isset( $this->info[ $section ] ) ) {
+			return $details;
+		}
+
+		foreach ( $this->info[ $section ]['fields'] as $field_key => $field ) {
+			$details[] = array(
+				'field'   => $field_key,
+				'section' => $section,
+				'label'   => $field['label'],
+				'value'   => $field['value'],
+				'debug'   => isset( $field['value'] ) ? $field['value'] : null,
+				'private' => isset( $field['private'] ) ? (bool) $field['private'] : false,
+			);
+		}
+
+		return $details;
 	}
 
 	protected function run_checks( $checks ) {
