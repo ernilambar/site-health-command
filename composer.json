@@ -22,7 +22,8 @@
         "bundled": false,
         "commands": [
             "site-health check",
-            "site-health status"
+            "site-health status",
+            "site-health info sections"
         ]
     },
     "autoload": {

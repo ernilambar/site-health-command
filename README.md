@@ -60,6 +60,52 @@ wp site-health status
     $ wp site-health status
     good
 
+
+
+### wp site-health info sections
+
+List site health info sections.
+
+~~~
+wp site-health info sections [--format=<format>]
+~~~
+
+**OPTIONS**
+
+	[--format=<format>]
+		Render output in a particular format.
+		---
+		default: table
+		options:
+		  - table
+		  - csv
+		  - json
+		  - yaml
+		---
+
+**EXAMPLES**
+
+    # List site health info sections.
+    $ wp site-health info sections
+    +------------------------+---------------------+
+    | label                  | section             |
+    +------------------------+---------------------+
+    | WordPress              | wp-core             |
+    | Directories and Sizes  | wp-paths-sizes      |
+    | Drop-ins               | wp-dropins          |
+    | Active Theme           | wp-active-theme     |
+    | Parent Theme           | wp-parent-theme     |
+    | Inactive Themes        | wp-themes-inactive  |
+    | Must Use Plugins       | wp-mu-plugins       |
+    | Active Plugins         | wp-plugins-active   |
+    | Inactive Plugins       | wp-plugins-inactive |
+    | Media Handling         | wp-media            |
+    | Server                 | wp-server           |
+    | Database               | wp-database         |
+    | WordPress Constants    | wp-constants        |
+    | Filesystem Permissions | wp-filesystem       |
+    +------------------------+---------------------+
+
 ## Installing
 
 Installing this package requires WP-CLI v2.11 or greater. Update to the latest stable release with `wp cli update`.
