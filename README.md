@@ -46,6 +46,53 @@ wp site-health check [--format=<format>]
 
 
 
+### wp site-health info
+
+Displays site health info.
+
+~~~
+wp site-health info [<section>] [--all] [--fields=<fields>] [--format=<format>] [--private]
+~~~
+
+**OPTIONS**
+
+	[<section>]
+		Section slug.
+
+	[--all]
+		Displays info for all sections.
+
+	[--fields=<fields>]
+		Limit the output to specific fields.
+
+	[--format=<format>]
+		Render output in a particular format.
+		---
+		default: table
+		options:
+		  - table
+		  - csv
+		  - json
+		  - yaml
+		---
+
+	[--private]
+		Display private fields. Disabled by default.
+
+**EXAMPLES**
+
+    # List site health info.
+    $ wp site-health info wp-constants
+    +---------------------+---------------------+-----------+-----------+
+    | field               | label               | value     | debug     |
+    +---------------------+---------------------+-----------+-----------+
+    | WP_HOME             | WP_HOME             | Undefined | undefined |
+    | WP_SITEURL          | WP_SITEURL          | Undefined | undefined |
+    | WP_MEMORY_LIMIT     | WP_MEMORY_LIMIT     | 40M       |           |
+    | WP_MAX_MEMORY_LIMIT | WP_MAX_MEMORY_LIMIT | 256M      |           |
+
+
+
 ### wp site-health list-info-sections
 
 List site health info sections.
