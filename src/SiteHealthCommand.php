@@ -341,11 +341,44 @@ class SiteHealthCommand extends WP_CLI_Command {
 									'status'      => $test_result['status'],
 									'label'       => $test_result['label'],
 									'test'        => $test_result['test'],
-									'description' => wp_strip_all_tags( $test_result['description'] ),
+									'description' => Utils\strip_tags( $test_result['description'] ),
 									'type'        => $test_result['badge']['label'],
 								)
 							);
 						}
+					}
+				} elseif ( 'async' === $check['check_type'] ) {
+
+					if ( isset( $check['async_direct_test'] ) && is_callable( $check['async_direct_test'] ) ) {
+							$test_function = $check['async_direct_test'][1];
+
+							$test_result = $this->instance->$test_function();
+
+							$result = array_merge(
+								$result,
+								array(
+									'status'      => $test_result['status'],
+									'label'       => $test_result['label'],
+									'test'        => $test_result['test'],
+									'description' => Utils\strip_tags( $test_result['description'] ),
+									'type'        => $test_result['badge']['label'],
+								)
+							);
+					}
+
+					if ( false !== strpos( $check['test'], 'authorization-header' ) ) {
+						$test_result = $this->instance->get_test_authorization_header();
+
+						$result = array_merge(
+							$result,
+							array(
+								'status'      => $test_result['status'],
+								'label'       => $test_result['label'],
+								'test'        => $test_result['test'],
+								'description' => Utils\strip_tags( $test_result['description'] ),
+								'type'        => $test_result['badge']['label'],
+							)
+						);
 					}
 				}
 
