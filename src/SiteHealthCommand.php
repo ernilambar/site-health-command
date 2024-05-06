@@ -179,6 +179,101 @@ class SiteHealthCommand extends WP_CLI_Command {
 		$formatter->display_items( $sections );
 	}
 
+	/**
+	 * Displays site health info.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [<section>]
+	 * : Section slug.
+	 *
+	 * [--all]
+	 * : Displays info for all sections.
+	 *
+	 * [--fields=<fields>]
+	 * : Limit the output to specific fields.
+	 *
+	 * [--format=<format>]
+	 * : Render output in a particular format.
+	 * ---
+	 * default: table
+	 * options:
+	 *   - table
+	 *   - csv
+	 *   - json
+	 *   - yaml
+	 * ---
+	 *
+	 * [--private]
+	 * : Display private fields. Disabled by default.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # List site health info.
+	 *     $ wp site-health list-info-sections
+	 *     +------------------------+---------------------+
+	 *     | label                  | section             |
+	 *     +------------------------+---------------------+
+	 *     | WordPress              | wp-core             |
+	 *     | Directories and Sizes  | wp-paths-sizes      |
+	 *     | Drop-ins               | wp-dropins          |
+	 *     | Active Theme           | wp-active-theme     |
+	 *     | Parent Theme           | wp-parent-theme     |
+	 *     | Inactive Themes        | wp-themes-inactive  |
+	 *     | Must Use Plugins       | wp-mu-plugins       |
+	 *     | Active Plugins         | wp-plugins-active   |
+	 *     | Inactive Plugins       | wp-plugins-inactive |
+	 *     | Media Handling         | wp-media            |
+	 *     | Server                 | wp-server           |
+	 *     | Database               | wp-database         |
+	 *     | WordPress Constants    | wp-constants        |
+	 *     | Filesystem Permissions | wp-filesystem       |
+	 *     +------------------------+---------------------+
+	 */
+	public function info( $args, $assoc_args ) {
+		$section = reset( $args );
+
+		$all = Utils\get_flag_value( $assoc_args, 'all', false );
+
+		if ( empty( $section ) && ! $all ) {
+			WP_CLI::error( 'Please specify a section, or use the --all flag.' );
+		}
+
+		$private = Utils\get_flag_value( $assoc_args, 'private', false );
+
+		$default_fields = [ 'field', 'label', 'value', 'debug' ];
+
+		if ( $private ) {
+			$default_fields = [ 'field', 'private', 'label', 'value', 'debug' ];
+		}
+
+		if ( $all ) {
+			$all_sections = $this->get_sections();
+
+			$sections = wp_list_pluck( $all_sections, 'section' );
+
+			$details = [];
+
+			foreach ( $sections as $section ) {
+				$details = array_merge( $details, $this->get_section_info( $section, $assoc_args ) );
+			}
+		} else {
+			$details = $this->get_section_info( $section, $assoc_args );
+		}
+
+		if ( ! $private ) {
+			$details = wp_list_filter( $details, [ 'private' => false ] );
+		}
+
+		if ( empty( $assoc_args['fields'] ) ) {
+			$assoc_args['fields'] = $default_fields;
+		}
+
+		$formatter = $this->get_formatter( $assoc_args );
+
+		$formatter->display_items( $details );
+	}
+
 	protected function get_sections() {
 		$sections = [];
 
@@ -190,6 +285,27 @@ class SiteHealthCommand extends WP_CLI_Command {
 		}
 
 		return $sections;
+	}
+
+	protected function get_section_info( $section ) {
+		$details = [];
+
+		if ( ! isset( $this->info[ $section ] ) ) {
+			return $details;
+		}
+
+		foreach ( $this->info[ $section ]['fields'] as $field_key => $field ) {
+			$details[] = array(
+				'field'   => $field_key,
+				'section' => $section,
+				'label'   => $field['label'],
+				'value'   => $field['value'],
+				'debug'   => isset( $field['debug'] ) ? $field['debug'] : null,
+				'private' => isset( $field['private'] ) ? (bool) $field['private'] : false,
+			);
+		}
+
+		return $details;
 	}
 
 	protected function run_checks( $checks ) {

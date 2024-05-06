@@ -35,3 +35,31 @@ Feature: Site Health tests
       | Database               | wp-database         |
       | WordPress Constants    | wp-constants        |
       | Filesystem Permissions | wp-filesystem       |
+
+  @require-wp-5.4
+  Scenario: Site Health Info by section
+    Given a WP install
+
+    When I try `wp site-health info`
+    Then STDERR should be:
+      """
+      Error: Please specify a section, or use the --all flag.
+      """
+
+    When I run `wp site-health info wp-constants`
+    Then STDOUT should not contain:
+      """
+      ABSPATH
+      """
+
+    When I run `wp site-health info wp-constants --private`
+    Then STDOUT should contain:
+      """
+      ABSPATH
+      """
+
+    When I run `wp site-health info wp-constants`
+    Then STDOUT should be a table containing rows:
+      | field      | label      | value     | debug     |
+      | WP_HOME    | WP_HOME    | Undefined | undefined |
+      | WP_SITEURL | WP_SITEURL | Undefined | undefined |
