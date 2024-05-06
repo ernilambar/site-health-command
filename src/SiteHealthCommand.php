@@ -210,25 +210,14 @@ class SiteHealthCommand extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # List site health info.
-	 *     $ wp site-health list-info-sections
-	 *     +------------------------+---------------------+
-	 *     | label                  | section             |
-	 *     +------------------------+---------------------+
-	 *     | WordPress              | wp-core             |
-	 *     | Directories and Sizes  | wp-paths-sizes      |
-	 *     | Drop-ins               | wp-dropins          |
-	 *     | Active Theme           | wp-active-theme     |
-	 *     | Parent Theme           | wp-parent-theme     |
-	 *     | Inactive Themes        | wp-themes-inactive  |
-	 *     | Must Use Plugins       | wp-mu-plugins       |
-	 *     | Active Plugins         | wp-plugins-active   |
-	 *     | Inactive Plugins       | wp-plugins-inactive |
-	 *     | Media Handling         | wp-media            |
-	 *     | Server                 | wp-server           |
-	 *     | Database               | wp-database         |
-	 *     | WordPress Constants    | wp-constants        |
-	 *     | Filesystem Permissions | wp-filesystem       |
-	 *     +------------------------+---------------------+
+	 *     $ wp site-health info wp-constants
+	 *     +---------------------+---------------------+-----------+-----------+
+	 *     | field               | label               | value     | debug     |
+	 *     +---------------------+---------------------+-----------+-----------+
+	 *     | WP_HOME             | WP_HOME             | Undefined | undefined |
+	 *     | WP_SITEURL          | WP_SITEURL          | Undefined | undefined |
+	 *     | WP_MEMORY_LIMIT     | WP_MEMORY_LIMIT     | 40M       |           |
+	 *     | WP_MAX_MEMORY_LIMIT | WP_MAX_MEMORY_LIMIT | 256M      |           |
 	 */
 	public function info( $args, $assoc_args ) {
 		$section = reset( $args );
