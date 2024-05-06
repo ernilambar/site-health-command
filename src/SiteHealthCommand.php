@@ -294,15 +294,31 @@ class SiteHealthCommand extends WP_CLI_Command {
 			return $details;
 		}
 
+		if ( 'wp-paths-sizes' === $section ) {
+			$sizes_data = WP_Debug_Data::get_sizes();
+		}
+
 		foreach ( $this->info[ $section ]['fields'] as $field_key => $field ) {
-			$details[] = array(
-				'field'   => $field_key,
-				'section' => $section,
-				'label'   => $field['label'],
-				'value'   => $field['value'],
-				'debug'   => isset( $field['debug'] ) ? $field['debug'] : null,
-				'private' => isset( $field['private'] ) ? (bool) $field['private'] : false,
-			);
+			$item = [];
+
+			$item['field']   = $field_key;
+			$item['section'] = $section;
+			$item['label']   = $field['label'];
+			$item['value']   = $field['value'];
+			$item['debug']   = isset( $field['debug'] ) ? $field['debug'] : null;
+			$item['private'] = isset( $field['private'] ) ? (bool) $field['private'] : false;
+
+			if ( 'wp-paths-sizes' === $section ) {
+				if ( isset( $sizes_data[ $field_key ]['size'] ) ) {
+					$item['value'] = $sizes_data[ $field_key ]['size'];
+				}
+
+				if ( isset( $sizes_data[ $field_key ]['debug'] ) ) {
+					$item['debug'] = $sizes_data[ $field_key ]['debug'];
+				}
+			}
+
+			$details[] = $item;
 		}
 
 		return $details;
