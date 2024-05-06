@@ -4,8 +4,9 @@ namespace WP_CLI\SiteHealth;
 
 use WP_CLI;
 use WP_CLI\Utils;
-use WP_Site_Health;
 use WP_CLI_Command;
+use WP_Debug_Data;
+use WP_Site_Health;
 
 /**
  * Manage Site Health
@@ -18,6 +19,11 @@ class SiteHealthCommand extends WP_CLI_Command {
 	 * @var WP_Site_Health $instance Instance of WP_Site_Health class.
 	 */
 	protected $instance;
+
+	/**
+	 * @var array $info Debug info.
+	 */
+	protected $info;
 
 	/**
 	 * @var array $obj_fields Default fields to display for each test.
@@ -37,7 +43,12 @@ class SiteHealthCommand extends WP_CLI_Command {
 			require_once ABSPATH . 'wp-admin/includes/class-wp-site-health.php';
 		}
 
+		if ( ! class_exists( 'WP_Debug_Data' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-debug-data.php';
+		}
+
 		$this->instance = WP_Site_Health::get_instance();
+		$this->info     = WP_Debug_Data::debug_data();
 	}
 
 	/**
@@ -113,6 +124,72 @@ class SiteHealthCommand extends WP_CLI_Command {
 		}
 
 		WP_CLI::line( $site_status );
+	}
+
+	/**
+	 * List site health info sections.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--format=<format>]
+	 * : Render output in a particular format.
+	 * ---
+	 * default: table
+	 * options:
+	 *   - table
+	 *   - csv
+	 *   - json
+	 *   - yaml
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # List site health info sections.
+	 *     $ wp site-health list-info-sections
+	 *     +------------------------+---------------------+
+	 *     | label                  | section             |
+	 *     +------------------------+---------------------+
+	 *     | WordPress              | wp-core             |
+	 *     | Directories and Sizes  | wp-paths-sizes      |
+	 *     | Drop-ins               | wp-dropins          |
+	 *     | Active Theme           | wp-active-theme     |
+	 *     | Parent Theme           | wp-parent-theme     |
+	 *     | Inactive Themes        | wp-themes-inactive  |
+	 *     | Must Use Plugins       | wp-mu-plugins       |
+	 *     | Active Plugins         | wp-plugins-active   |
+	 *     | Inactive Plugins       | wp-plugins-inactive |
+	 *     | Media Handling         | wp-media            |
+	 *     | Server                 | wp-server           |
+	 *     | Database               | wp-database         |
+	 *     | WordPress Constants    | wp-constants        |
+	 *     | Filesystem Permissions | wp-filesystem       |
+	 *     +------------------------+---------------------+
+	 *
+	 * @subcommand list-info-sections
+	 */
+	public function list_info_sections( $args, $assoc_args ) {
+		$sections = $this->get_sections();
+
+		$format = Utils\get_flag_value( $assoc_args, 'format', 'table' );
+
+		$assoc_args['fields'] = [ 'label', 'section' ];
+
+		$formatter = $this->get_formatter( $assoc_args );
+
+		$formatter->display_items( $sections );
+	}
+
+	protected function get_sections() {
+		$sections = [];
+
+		foreach ( $this->info as $info_key => $info_item ) {
+			$sections[] = [
+				'label'   => $info_item['label'],
+				'section' => $info_key,
+			];
+		}
+
+		return $sections;
 	}
 
 	protected function run_checks( $checks ) {
@@ -195,7 +272,6 @@ class SiteHealthCommand extends WP_CLI_Command {
 	 * @return Formatter
 	 */
 	protected function get_formatter( &$assoc_args ) {
-
 		if ( ! empty( $assoc_args['fields'] ) ) {
 			if ( is_string( $assoc_args['fields'] ) ) {
 				$fields = explode( ',', $assoc_args['fields'] );
