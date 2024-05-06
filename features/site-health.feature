@@ -58,6 +58,12 @@ Feature: Site Health tests
       ABSPATH
       """
 
+    When I run `wp site-health info wp-paths-sizes`
+    Then STDOUT should not contain:
+      """
+      loading
+      """
+
     When I run `wp site-health info wp-constants`
     Then STDOUT should be a table containing rows:
       | field      | label      | value     | debug     |
