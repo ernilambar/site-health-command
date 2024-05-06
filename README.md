@@ -46,28 +46,12 @@ wp site-health check [--format=<format>]
 
 
 
-### wp site-health status
-
-Check site health status.
-
-~~~
-wp site-health status 
-~~~
-
-**EXAMPLES**
-
-    # Check site health status.
-    $ wp site-health status
-    good
-
-
-
-### wp site-health info sections
+### wp site-health list-info-sections
 
 List site health info sections.
 
 ~~~
-wp site-health info sections [--format=<format>]
+wp site-health list-info-sections [--format=<format>]
 ~~~
 
 **OPTIONS**
@@ -86,7 +70,7 @@ wp site-health info sections [--format=<format>]
 **EXAMPLES**
 
     # List site health info sections.
-    $ wp site-health info sections
+    $ wp site-health list-info-sections
     +------------------------+---------------------+
     | label                  | section             |
     +------------------------+---------------------+
@@ -105,6 +89,22 @@ wp site-health info sections [--format=<format>]
     | WordPress Constants    | wp-constants        |
     | Filesystem Permissions | wp-filesystem       |
     +------------------------+---------------------+
+
+
+
+### wp site-health status
+
+Check site health status.
+
+~~~
+wp site-health status 
+~~~
+
+**EXAMPLES**
+
+    # Check site health status.
+    $ wp site-health status
+    good
 
 ## Installing
 
