@@ -33,6 +33,10 @@ class SiteHealthCommand extends WP_CLI_Command {
 	 * Constructor.
 	 */
 	public function __construct() {
+		if ( ! class_exists( 'WP_Site_Health' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-site-health.php';
+		}
+
 		$this->instance = WP_Site_Health::get_instance();
 	}
 

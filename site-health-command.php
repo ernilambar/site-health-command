@@ -15,3 +15,4 @@ if ( file_exists( $wpcli_site_health_autoloader ) ) {
 }
 
 WP_CLI::add_command( 'site-health', SiteHealthCommand::class );
+WP_CLI::add_command( 'site-health info', SiteHealthInfoCommand::class );
