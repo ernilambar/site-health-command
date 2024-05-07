@@ -361,13 +361,24 @@ class SiteHealthCommand extends WP_CLI_Command {
 								)
 							);
 						}
+					} elseif ( is_callable( $check['test'] ) ) {
+						$test_result = call_user_func( $check['test'] );
+
+						$result = array_merge(
+							$result,
+							array(
+								'status'      => $test_result['status'],
+								'label'       => $test_result['label'],
+								'test'        => $test_result['test'],
+								'description' => Utils\strip_tags( $test_result['description'] ),
+								'type'        => $test_result['badge']['label'],
+							)
+						);
 					}
 				} elseif ( 'async' === $check['check_type'] ) {
 
 					if ( isset( $check['async_direct_test'] ) && is_callable( $check['async_direct_test'] ) ) {
-							$test_function = $check['async_direct_test'][1];
-
-							$test_result = $this->instance->$test_function();
+							$test_result = call_user_func( $check['async_direct_test'] );
 
 							$result = array_merge(
 								$result,
