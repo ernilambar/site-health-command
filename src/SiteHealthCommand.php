@@ -47,6 +47,9 @@ class SiteHealthCommand extends WP_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 *
+	 * [--<field>=<value>]
+	 * : Filter results based on the value of a field.
+	 *
 	 * [--fields=<fields>]
 	 * : Limit the output to specific fields.
 	 *
@@ -83,6 +86,25 @@ class SiteHealthCommand extends WP_CLI_Command {
 
 		$checks  = $this->get_checks();
 		$results = $this->run_checks( $checks );
+
+		foreach ( $results as $key => &$item ) {
+
+			foreach ( $fields as $field ) {
+				if ( ! array_key_exists( $field, $assoc_args ) ) {
+					continue;
+				}
+
+				// This can be either a value to filter by or a comma-separated list of values.
+				// Also, it is not forbidden for a value to contain a comma (in which case we can filter only by one).
+				$field_filter = $assoc_args[ $field ];
+				if (
+					$item[ $field ] !== $field_filter
+					&& ! in_array( $item[ $field ], array_map( 'trim', explode( ',', $field_filter ) ), true )
+				) {
+					unset( $results[ $key ] );
+				}
+			}
+		}
 
 		$formatter = new Formatter( $assoc_args, $fields );
 		$formatter->display_items( $results );

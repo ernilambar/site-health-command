@@ -16,10 +16,13 @@ This package implements the following commands:
 Run site health checks.
 
 ~~~
-wp site-health check [--fields=<fields>] [--format=<format>]
+wp site-health check [--<field>=<value>] [--fields=<fields>] [--format=<format>]
 ~~~
 
 **OPTIONS**
+
+	[--<field>=<value>]
+		Filter results based on the value of a field.
 
 	[--fields=<fields>]
 		Limit the output to specific fields.
