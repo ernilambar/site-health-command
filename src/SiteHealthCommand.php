@@ -3,6 +3,7 @@
 namespace WP_CLI\SiteHealth;
 
 use WP_CLI;
+use WP_CLI\Formatter;
 use WP_CLI\Utils;
 use WP_CLI_Command;
 use WP_Debug_Data;
@@ -26,16 +27,6 @@ class SiteHealthCommand extends WP_CLI_Command {
 	protected $info;
 
 	/**
-	 * @var array $obj_fields Default fields to display for each test.
-	 */
-	protected $obj_fields = array(
-		'check',
-		'type',
-		'status',
-		'label',
-	);
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -55,6 +46,9 @@ class SiteHealthCommand extends WP_CLI_Command {
 	 * Run site health checks.
 	 *
 	 * ## OPTIONS
+	 *
+	 * [--fields=<fields>]
+	 * : Limit the output to specific fields.
 	 *
 	 * [--format=<format>]
 	 * : Render output in a particular format.
@@ -80,14 +74,17 @@ class SiteHealthCommand extends WP_CLI_Command {
 	 *     | PHP Version       | Performance | good        | Your site is running the current version of PHP (8.2.18) |
 	 */
 	public function check( $args, $assoc_args ) {
-		$checks = $this->get_checks();
+		$fields = array(
+			'check',
+			'type',
+			'status',
+			'label',
+		);
 
+		$checks  = $this->get_checks();
 		$results = $this->run_checks( $checks );
 
-		$format = Utils\get_flag_value( $assoc_args, 'format', 'table' );
-
-		$formatter = $this->get_formatter( $assoc_args );
-
+		$formatter = new Formatter( $assoc_args, $fields );
 		$formatter->display_items( $results );
 	}
 
@@ -101,7 +98,7 @@ class SiteHealthCommand extends WP_CLI_Command {
 	 *     good
 	 */
 	public function status() {
-		$site_status = '';
+		$site_status = 'good';
 
 		$checks = $this->get_checks();
 
@@ -117,8 +114,6 @@ class SiteHealthCommand extends WP_CLI_Command {
 
 				if ( $good_percent < 80 ) {
 					$site_status = 'recommended';
-				} else {
-					$site_status = 'good';
 				}
 			}
 		}
@@ -130,6 +125,9 @@ class SiteHealthCommand extends WP_CLI_Command {
 	 * List site health info sections.
 	 *
 	 * ## OPTIONS
+	 *
+	 * [--fields=<fields>]
+	 * : Limit the output to specific fields.
 	 *
 	 * [--format=<format>]
 	 * : Render output in a particular format.
@@ -168,14 +166,14 @@ class SiteHealthCommand extends WP_CLI_Command {
 	 * @subcommand list-info-sections
 	 */
 	public function list_info_sections( $args, $assoc_args ) {
+		$fields = array(
+			'label',
+			'section',
+		);
+
 		$sections = $this->get_sections();
 
-		$format = Utils\get_flag_value( $assoc_args, 'format', 'table' );
-
-		$assoc_args['fields'] = [ 'label', 'section' ];
-
-		$formatter = $this->get_formatter( $assoc_args );
-
+		$formatter = new Formatter( $assoc_args, $fields );
 		$formatter->display_items( $sections );
 	}
 
@@ -258,8 +256,7 @@ class SiteHealthCommand extends WP_CLI_Command {
 			$assoc_args['fields'] = $default_fields;
 		}
 
-		$formatter = $this->get_formatter( $assoc_args );
-
+		$formatter = new Formatter( $assoc_args, $default_fields );
 		$formatter->display_items( $details );
 	}
 
@@ -417,24 +414,5 @@ class SiteHealthCommand extends WP_CLI_Command {
 		$output['total'] = array_sum( $output );
 
 		return $output;
-	}
-
-	/**
-	 * Get Formatter object based on supplied parameters.
-	 *
-	 * @param array $assoc_args Parameters passed to command. Determines formatting.
-	 * @return Formatter
-	 */
-	protected function get_formatter( &$assoc_args ) {
-		if ( ! empty( $assoc_args['fields'] ) ) {
-			if ( is_string( $assoc_args['fields'] ) ) {
-				$fields = explode( ',', $assoc_args['fields'] );
-			} else {
-				$fields = $assoc_args['fields'];
-			}
-		} else {
-			$fields = $this->obj_fields;
-		}
-		return new WP_CLI\Formatter( $assoc_args, $fields );
 	}
 }

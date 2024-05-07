@@ -4,14 +4,37 @@ Feature: Site Health tests
   Scenario: Run site health checks
     Given a WP install
 
-    When I run `wp site-health check`
-    Then STDOUT should not be empty
-    And STDERR should be empty
-    And the return code should be 0
+    When I run `wp site-health check --fields=check,type,status --format=csv`
+    Then STDOUT should contain:
+      """
+      "Plugin Versions",Security,recommended
+      """
+    And STDOUT should contain:
+      """
+      "Theme Versions",Security,recommended
+      """
+    And STDOUT should contain:
+      """
+      "PHP Default Timezone",Performance,good
+      """
+    And STDOUT should contain:
+      """
+      "Background updates",Security,good
+      """
+    And STDOUT should contain:
+      """
+      "Authorization header",Security,recommended
+      """
+    And STDOUT should contain:
+      """
+      "HTTPS status",Security,good
+      """
 
     When I run `wp site-health status`
-    Then STDOUT should not be empty
-    And STDERR should be empty
+    Then STDOUT should be:
+      """
+      recommended
+      """
     And the return code should be 0
 
   @require-wp-5.4
@@ -56,6 +79,24 @@ Feature: Site Health tests
     Then STDOUT should contain:
       """
       ABSPATH
+      """
+
+    When I run `wp site-health info wp-constants --format=csv`
+    Then STDOUT should not contain:
+      """
+      ,private,
+      """
+
+    When I run `wp site-health info wp-constants --private --format=csv`
+    Then STDOUT should contain:
+      """
+      ,private,
+      """
+
+    When I run `wp site-health info wp-constants --fields=field,private,value --format=csv`
+    Then STDOUT should contain:
+      """
+      ,private,
       """
 
     When I run `wp site-health info wp-paths-sizes`
