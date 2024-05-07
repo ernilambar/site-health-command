@@ -69,6 +69,18 @@ Feature: Site Health tests
       Error: Please specify a section, or use the --all flag.
       """
 
+    When I try `wp site-health info non-existent-info-section`
+    Then STDERR should be:
+      """
+      Error: Invalid section.
+      """
+
+    When I try `wp site-health info wp-constants --all`
+    Then STDERR should be:
+      """
+      Error: Please specify a section, or use the --all flag.
+      """
+
     When I run `wp site-health info wp-constants`
     Then STDOUT should not contain:
       """

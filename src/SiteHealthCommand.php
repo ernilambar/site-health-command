@@ -222,7 +222,7 @@ class SiteHealthCommand extends WP_CLI_Command {
 
 		$all = Utils\get_flag_value( $assoc_args, 'all', false );
 
-		if ( empty( $section ) && ! $all ) {
+		if ( ( empty( $section ) && ! $all ) || ( ! empty( $section ) && $all ) ) {
 			WP_CLI::error( 'Please specify a section, or use the --all flag.' );
 		}
 
@@ -245,6 +245,7 @@ class SiteHealthCommand extends WP_CLI_Command {
 				$details = array_merge( $details, $this->get_section_info( $section, $assoc_args ) );
 			}
 		} else {
+			$this->validate_section( $section );
 			$details = $this->get_section_info( $section, $assoc_args );
 		}
 
@@ -442,5 +443,20 @@ class SiteHealthCommand extends WP_CLI_Command {
 		$output['total'] = array_sum( $output );
 
 		return $output;
+	}
+
+	/**
+	 * Checks whether a section is a valid section.
+	 *
+	 * @param string $section Section slug.
+	 */
+	private function validate_section( $section ) {
+		$all_sections = $this->get_sections();
+
+		$matches = wp_list_filter( $all_sections, [ 'section' => $section ] );
+
+		if ( ! count( $matches ) ) {
+			WP_CLI::error( 'Invalid section.' );
+		}
 	}
 }
