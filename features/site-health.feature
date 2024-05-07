@@ -30,6 +30,12 @@ Feature: Site Health tests
       "HTTPS status",Security,good
       """
 
+    When I run `wp site-health check --fields=check,status,type --format=csv --status=good`
+    Then STDOUT should not contain:
+      """
+      ,recommended,
+      """
+
     When I run `wp site-health status`
     Then STDOUT should be:
       """
