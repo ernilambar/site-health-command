@@ -19,12 +19,12 @@ class SiteHealthCommand extends WP_CLI_Command {
 	/**
 	 * @var WP_Site_Health $instance Instance of WP_Site_Health class.
 	 */
-	protected $instance;
+	private $instance;
 
 	/**
 	 * @var array $info Debug info.
 	 */
-	protected $info;
+	private $info;
 
 	/**
 	 * Constructor.
@@ -260,7 +260,12 @@ class SiteHealthCommand extends WP_CLI_Command {
 		$formatter->display_items( $details );
 	}
 
-	protected function get_sections() {
+	/**
+	 * Returns info sections.
+	 *
+	 * @return array Info sections.
+	 */
+	private function get_sections() {
 		$sections = [];
 
 		foreach ( $this->info as $info_key => $info_item ) {
@@ -273,7 +278,13 @@ class SiteHealthCommand extends WP_CLI_Command {
 		return $sections;
 	}
 
-	protected function get_section_info( $section ) {
+	/**
+	 * Returns debug info of the section.
+	 *
+	 * @param string $section Section slug.
+	 * @return array Info details.
+	 */
+	private function get_section_info( $section ) {
 		$details = [];
 
 		if ( ! isset( $this->info[ $section ] ) ) {
@@ -310,7 +321,13 @@ class SiteHealthCommand extends WP_CLI_Command {
 		return $details;
 	}
 
-	protected function run_checks( $checks ) {
+	/**
+	 * Returns check results.
+	 *
+	 * @param array $checks Checks to run.
+	 * @return array Check results.
+	 */
+	private function run_checks( $checks ) {
 		$results = [];
 
 		if ( ! empty( $checks ) ) {
@@ -386,7 +403,12 @@ class SiteHealthCommand extends WP_CLI_Command {
 		return $results;
 	}
 
-	protected function get_checks() {
+	/**
+	 * Returns list of checks.
+	 *
+	 * @return array Checks details.
+	 */
+	private function get_checks() {
 		$checks = [];
 
 		$all_checks = WP_Site_Health::get_tests();
@@ -404,6 +426,12 @@ class SiteHealthCommand extends WP_CLI_Command {
 		return $checks;
 	}
 
+	/**
+	 * Returns details of status counts.
+	 *
+	 * @param array $results Check results.
+	 * @return array Count details.
+	 */
 	private function get_status_count_details( $results ) {
 		$output = [
 			'critical'    => count( wp_list_filter( $results, [ 'status' => 'critical' ] ) ),
