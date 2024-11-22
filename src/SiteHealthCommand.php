@@ -264,11 +264,11 @@ class SiteHealthCommand extends WP_CLI_Command {
 			$details = [];
 
 			foreach ( $sections as $section ) {
-				$details = array_merge( $details, $this->get_section_info( $section, $assoc_args ) );
+				$details = array_merge( $details, $this->get_section_info( $section ) );
 			}
 		} else {
 			$this->validate_section( $section );
-			$details = $this->get_section_info( $section, $assoc_args );
+			$details = $this->get_section_info( $section );
 		}
 
 		if ( ! $private ) {
